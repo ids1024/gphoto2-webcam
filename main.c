@@ -88,9 +88,9 @@ int main() {
 		return 1;
 	}
 
-	int fd = open("/dev/video0", O_RDWR);
+	int fd = open("/dev/video0", O_WRONLY);
 	if (fd == -1) {
-		perror("fopen");
+		perror("open");
 		return 1;
 	}
 
