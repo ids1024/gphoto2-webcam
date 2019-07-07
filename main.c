@@ -78,7 +78,7 @@ int main() {
 
 	tjhandle handle = tjInitDecompress();
 	unsigned char dstBuf[WIDTH * HEIGHT * 3];
-	if (tjDecompressToYUV2(handle, data, size, dstBuf, WIDTH, 1, HEIGHT, TJFLAG_ACCURATEDCT) != 0) {
+	if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_RGB, TJFLAG_ACCURATEDCT) != 0) {
 		fprintf(stderr, "%s\n", tjGetErrorStr2(handle));
 		return 1;
 	}
@@ -89,26 +89,21 @@ int main() {
 		return 1;
 	}
 
-	struct v4l2_capability vid_caps;
-	ret = ioctl(fd, VIDIOC_QUERYCAP, &vid_caps);
-	if (ret == -1) {
-		//fprintf(stderr, "Not a video device\n");
-		perror("ioctl");
-		return 1;
-	}
-
 	struct v4l2_format vid_format;
 	memset(&vid_format, 0, sizeof(vid_format));
 	ret = ioctl(fd, VIDIOC_G_FMT, &vid_format);
+	/*
 	if (ret == -1) {
+		fprintf(stderr, "A\n");
 		perror("ioctl");
 		return 1;
 	}
+	*/
 
 	vid_format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	vid_format.fmt.pix.width = WIDTH;
 	vid_format.fmt.pix.height = HEIGHT;
-	vid_format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+	vid_format.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
 	vid_format.fmt.pix.sizeimage = HEIGHT * WIDTH * 3;
 	vid_format.fmt.pix.field = V4L2_FIELD_NONE;
 	vid_format.fmt.pix.bytesperline = WIDTH * 3;
