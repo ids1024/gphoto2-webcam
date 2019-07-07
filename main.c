@@ -82,18 +82,6 @@ int main() {
 		return 1;
 	}
 
-	/*
-	gp_list_new(&list);
-	ret = gp_camera_autodetect(list, ctx);
-	if (ret != GP_OK) {
-		fprintf(stderr, "gp_camera_autodetect: %d\n", ret);
-		return 1;
-	}
-	gp_list_free(list);
-	if (gp_list_count(list) != 0) {
-	}
-	*/
-
 	ret = gp_camera_init(camera, ctx);
 	if (ret != GP_OK) {
 		fprintf(stderr, "gp_camera_init: %d\n", ret);
