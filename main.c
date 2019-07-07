@@ -48,16 +48,7 @@ int main() {
 	gp_file_get_data_and_size(file, &data, &size);
 	gp_file_unref(file);
 
-//	struct jpeg_decompress_struct cinfo;
-//	jpeg_mem_src(&cinfo, data, size);
-//	jpeg_start_decompress(&cinfo);
-	// XXX
-	//
-	//read_scanlines(j_decompress_ptr cinfo,
-          //                             JSAMPARRAY scanlines,
-            //                           JDIMENSION max_lines);
-//	jpeg_finish_decompress(&cinfo);
-//	*/
+	*/
 
 	FILE *f = fopen("/tmp/capture_preview.jpg", "rb");
 	if (ret !=  0) {
