@@ -91,14 +91,15 @@ int main() {
 			return 1;
 
 		}
-		printf("%d\n", size);
 
 		tjhandle handle = tjInitDecompress();
 		unsigned char dstBuf[WIDTH * HEIGHT * 3];
-		if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_RGB, TJFLAG_ACCURATEDCT) != 0) {
+		if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_BGR, TJFLAG_FASTDCT) != 0) {
 			fprintf(stderr, "%s\n", tjGetErrorStr2(handle));
 			return 1;
 		}
+
+		gp_file_unref(file);
 
 		write(fd, dstBuf, WIDTH * HEIGHT * 3);
 	}
