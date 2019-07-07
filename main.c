@@ -14,7 +14,6 @@
 int main() {
 	int ret;
 
-	/*
 	GPContext *ctx = gp_context_new();
 	CameraList *list;
 
@@ -25,6 +24,7 @@ int main() {
 		return 1;
 	}
 
+	/*
 	gp_list_new(&list);
 	ret = gp_camera_autodetect(list, ctx);
 	if (ret != GP_OK) {
@@ -34,43 +34,11 @@ int main() {
 	gp_list_free(list);
 	if (gp_list_count(list) != 0) {
 	}
-
-	CameraFile *file;
-	ret = gp_file_new(&file);
-	if (ret != GP_OK) {
-		fprintf(stderr, "gp_file_new: %d\n", ret);
-		return 1;
-	}
-	gp_camera_capture_preview(camera, file, ctx);
-
-	const char *data;
-	unsigned long int size;
-	gp_file_get_data_and_size(file, &data, &size);
-	gp_file_unref(file);
-
 	*/
 
-	FILE *f = fopen("/tmp/capture_preview.jpg", "rb");
-	if (ret !=  0) {
-		perror("fopen");
-		return 1;
-	}
-	char *data = malloc(1024);
-	unsigned long int size = 0;
-	while ((ret = fread(data + size, 1, 1024, f)) > 0) {
-		size += ret;
-		data = realloc(data, size + 1024);
-	}
-	if (ferror(f)) {
-		perror("fread");
-		return 1;
-	}
-	fclose(f);
-
-	tjhandle handle = tjInitDecompress();
-	unsigned char dstBuf[WIDTH * HEIGHT * 3];
-	if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_RGB, TJFLAG_ACCURATEDCT) != 0) {
-		fprintf(stderr, "%s\n", tjGetErrorStr2(handle));
+	ret = gp_camera_init(camera, ctx);
+	if (ret != GP_OK) {
+		fprintf(stderr, "gp_camera_init: %d\n", ret);
 		return 1;
 	}
 
@@ -107,6 +75,31 @@ int main() {
 	}
 
 	for (;;) {
+		CameraFile *file;
+		ret = gp_file_new(&file);
+		if (ret != GP_OK) {
+			fprintf(stderr, "gp_file_new: %d\n", ret);
+			return 1;
+		}
+		gp_camera_capture_preview(camera, file, ctx);
+
+		const char *data;
+		unsigned long int size;
+		ret = gp_file_get_data_and_size(file, &data, &size);
+		if (ret != GP_OK) {
+			fprintf(stderr, "gp_camera_capture_preview: %d\n", ret);
+			return 1;
+
+		}
+		printf("%d\n", size);
+
+		tjhandle handle = tjInitDecompress();
+		unsigned char dstBuf[WIDTH * HEIGHT * 3];
+		if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_RGB, TJFLAG_ACCURATEDCT) != 0) {
+			fprintf(stderr, "%s\n", tjGetErrorStr2(handle));
+			return 1;
+		}
+
 		write(fd, dstBuf, WIDTH * HEIGHT * 3);
 	}
 }
