@@ -1,7 +1,7 @@
 all: main
 
 main: main.c
-	gcc -o $@ $^ -lgphoto2 -lturbojpeg
+	gcc -o $@ $^ -lgphoto2
 
 clean:
 	rm -f main

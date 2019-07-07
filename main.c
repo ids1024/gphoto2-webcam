@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <turbojpeg.h>
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <stropts.h>
@@ -11,35 +10,24 @@
 #define WIDTH 960
 #define HEIGHT 640
 
-int capture_preview(Camera* camera, char *dstBuf, GPContext *ctx) {
+int capture_preview(Camera* camera, CameraFile **file, const char **data, unsigned long int *size, GPContext *ctx) {
 	// XXX correct size of buffer
 	
 	int ret;
 
-	CameraFile *file;
-	ret = gp_file_new(&file);
+	ret = gp_file_new(file);
 	if (ret != GP_OK) {
 		fprintf(stderr, "gp_file_new: %d\n", ret);
 		return 1;
 	}
-	gp_camera_capture_preview(camera, file, ctx);
+	gp_camera_capture_preview(camera, *file, ctx);
 
-	const char *data;
-	unsigned long int size;
-	ret = gp_file_get_data_and_size(file, &data, &size);
+	ret = gp_file_get_data_and_size(*file, data, size);
 	if (ret != GP_OK) {
 		fprintf(stderr, "gp_camera_capture_preview: %d\n", ret);
 		return 1;
 
 	}
-
-	tjhandle handle = tjInitDecompress();
-	if (tjDecompress2(handle, data, size, dstBuf, WIDTH, 0, HEIGHT, TJPF_BGR, TJFLAG_FASTDCT) != 0) {
-		fprintf(stderr, "%s\n", tjGetErrorStr2(handle));
-		return 1;
-	}
-
-	gp_file_unref(file);
 
 	return 0;
 }
@@ -54,10 +42,8 @@ int set_vidformat(int fd) {
 	vid_format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	vid_format.fmt.pix.width = WIDTH;
 	vid_format.fmt.pix.height = HEIGHT;
-	vid_format.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
-	vid_format.fmt.pix.sizeimage = HEIGHT * WIDTH * 3;
+	vid_format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 	vid_format.fmt.pix.field = V4L2_FIELD_NONE;
-	vid_format.fmt.pix.bytesperline = WIDTH * 3;
 	vid_format.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
 
 	ret = ioctl(fd, VIDIOC_S_FMT, &vid_format);
@@ -100,12 +86,15 @@ int main() {
 	}
 
 	for (;;) {
-		unsigned char dstBuf[WIDTH * HEIGHT * 3];
-		ret = capture_preview(camera, dstBuf, ctx);
+		CameraFile *file;
+		const char *data;
+		unsigned long int size;
+		ret = capture_preview(camera, &file, &data, &size, ctx);
 		if (ret != 0) {
 			fprintf(stderr, "capture_preview: %d\n", ret);
 			return 1;
 		}
-		write(fd, dstBuf, WIDTH * HEIGHT * 3);
+		write(fd, data, size);
+		gp_file_unref(file);
 	}
 }
