@@ -1,59 +1,42 @@
 #include <gphoto2/gphoto2.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <linux/videodev2.h>
-#include <stropts.h>
-#include <string.h>
+#include <exception>
+#include <string>
+
+#include "V4l2Loopback.h"
 
 #define WIDTH 960
 #define HEIGHT 640
 
-int capture_preview(Camera* camera, CameraFile **file, const char **data, unsigned long int *size, GPContext *ctx) {
-	// XXX correct size of buffer
-	
+class Gphoto2Error: public std::exception {
+	std::string func;
+	int err;
+	public:
+	Gphoto2Error(std::string func, int err) {
+		this->func = func;
+		this->err = err;
+	}
+	const char* what() const throw() {
+		return (func + ": " + std::to_string(err)).c_str();
+	}
+};
+
+void capture_preview(Camera* camera, CameraFile **file, const char **data, unsigned long int *size, GPContext *ctx) {
 	int ret;
 
 	ret = gp_file_new(file);
 	if (ret != GP_OK) {
-		fprintf(stderr, "gp_file_new: %d\n", ret);
-		return 1;
+		throw Gphoto2Error("gp_file_new", ret);
 	}
 	gp_camera_capture_preview(camera, *file, ctx);
 
 	ret = gp_file_get_data_and_size(*file, data, size);
 	if (ret != GP_OK) {
-		fprintf(stderr, "gp_camera_capture_preview: %d\n", ret);
-		return 1;
-
+		throw Gphoto2Error("gp_camera_capture_preview", ret);
 	}
-
-	return 0;
 }
 
-int set_vidformat(int fd) {
-	int ret;
 
-	struct v4l2_format vid_format;
-	memset(&vid_format, 0, sizeof(vid_format));
-	ret = ioctl(fd, VIDIOC_G_FMT, &vid_format);
-
-	vid_format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-	vid_format.fmt.pix.width = WIDTH;
-	vid_format.fmt.pix.height = HEIGHT;
-	vid_format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-	vid_format.fmt.pix.field = V4L2_FIELD_NONE;
-	vid_format.fmt.pix.colorspace = V4L2_COLORSPACE_SRGB;
-
-	ret = ioctl(fd, VIDIOC_S_FMT, &vid_format);
-	if (ret == -1) {
-		perror("ioctl");
-		return 1;
-	}
-
-	return 0;
-}
 
 int main() {
 	int ret;
@@ -91,28 +74,15 @@ int main() {
 		printf("%s\n", name);
 	}
 
-	int fd = open("/dev/video0", O_WRONLY);
-	if (fd == -1) {
-		perror("open");
-		return 1;
-	}
-
-	ret = set_vidformat(fd);
-	if (ret != 0) {
-		fprintf(stderr, "set_vidformat: %d\n", ret);
-		return 1;
-	}
+	V4l2Loopback loopback("/dev/video0");
+	loopback.set_vidformat(HEIGHT, WIDTH);
 
 	for (;;) {
 		CameraFile *file;
 		const char *data;
 		unsigned long int size;
-		ret = capture_preview(camera, &file, &data, &size, ctx);
-		if (ret != 0) {
-			fprintf(stderr, "capture_preview: %d\n", ret);
-			return 1;
-		}
-		write(fd, data, size);
+		capture_preview(camera, &file, &data, &size, ctx);
+		loopback.write_frame(data, size);
 		gp_file_unref(file);
 	}
 }
