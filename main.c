@@ -59,7 +59,6 @@ int main() {
 	int ret;
 
 	GPContext *ctx = gp_context_new();
-	CameraList *list;
 
 	Camera *camera;
 	ret = gp_camera_new(&camera);
@@ -74,6 +73,24 @@ int main() {
 		return 1;
 	}
 
+ 	CameraWidget *window;
+	ret = gp_camera_get_config(camera, &window, ctx);
+	if (ret != GP_OK) {
+		fprintf(stderr, "gp_camera_get_config: %d\n", ret);
+		return 1;
+	}
+	for (int i = 0; i < gp_widget_count_children(window); i++) {
+		CameraWidget *child;
+		ret = gp_widget_get_child(window, i, &child);
+		if (ret != GP_OK) {
+			fprintf(stderr, "gp_widget_get_child: %d\n", ret);
+			return 1;
+		}
+		const char *name;
+		gp_widget_get_name(child, &name);
+		printf("%s\n", name);
+	}
+
 	int fd = open("/dev/video0", O_WRONLY);
 	if (fd == -1) {
 		perror("open");
@@ -83,6 +100,7 @@ int main() {
 	ret = set_vidformat(fd);
 	if (ret != 0) {
 		fprintf(stderr, "set_vidformat: %d\n", ret);
+		return 1;
 	}
 
 	for (;;) {
