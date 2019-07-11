@@ -1,2 +1,2 @@
-SOURCES = main.c
+SOURCES = main.cpp
 LIBS = -lgphoto2
