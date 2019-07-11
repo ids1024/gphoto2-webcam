@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <string>
 
-#include "gphoto2cpp.h"
 #include "V4l2Loopback.h"
+#include "gphoto2cpp.h"
 
 #define WIDTH 960
 #define HEIGHT 640

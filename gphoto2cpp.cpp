@@ -73,29 +73,33 @@ GphotoCameraWidget::Children GphotoCameraWidget::children() {
     return Children(widget);
 }
 
-GphotoCameraWidget::child_iterator& GphotoCameraWidget::child_iterator::operator++() {
+GphotoCameraWidget::child_iterator &GphotoCameraWidget::child_iterator::
+operator++() {
     n++;
     return *this;
 }
-bool GphotoCameraWidget::child_iterator::operator==(const child_iterator& rhs) const {
-    return n==rhs.n;
+bool GphotoCameraWidget::child_iterator::
+operator==(const child_iterator &rhs) const {
+    return n == rhs.n;
 }
 
-bool GphotoCameraWidget::child_iterator::operator!=(const child_iterator& rhs) const {
-    return n!=rhs.n;
+bool GphotoCameraWidget::child_iterator::
+operator!=(const child_iterator &rhs) const {
+    return n != rhs.n;
 }
 
 GphotoCameraWidget GphotoCameraWidget::child_iterator::operator*() {
-   CameraWidget *child;
-   gpCall(gp_widget_get_child, widget, n, &child);
-   gp_widget_ref(child);
-   return GphotoCameraWidget(child);
+    CameraWidget *child;
+    gpCall(gp_widget_get_child, widget, n, &child);
+    gp_widget_ref(child);
+    return GphotoCameraWidget(child);
 }
 
-GphotoCameraWidget::child_iterator::child_iterator(CameraWidget *widget, int n) : widget(widget), n(n) {
+GphotoCameraWidget::child_iterator::child_iterator(CameraWidget *widget, int n)
+    : widget(widget), n(n) {
 }
 
-GphotoCameraWidget::Children::Children(CameraWidget *widget) : widget(widget) {};
+GphotoCameraWidget::Children::Children(CameraWidget *widget) : widget(widget){};
 
 GphotoCameraWidget::child_iterator GphotoCameraWidget::Children::begin() {
     return GphotoCameraWidget::child_iterator(widget, 0);
@@ -106,8 +110,7 @@ GphotoCameraWidget::child_iterator GphotoCameraWidget::Children::end() {
     return GphotoCameraWidget::child_iterator(widget, count);
 };
 
-GphotoCameraWidget::GphotoCameraWidget(CameraWidget *widget) : widget(widget) {
-};
+GphotoCameraWidget::GphotoCameraWidget(CameraWidget *widget) : widget(widget){};
 
 GphotoCamera::GphotoCamera(GphotoContext ctx) : ctx(ctx) {
     gpCall(gp_camera_new, &camera);

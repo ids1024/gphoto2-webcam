@@ -3,8 +3,8 @@
 
 #include <exception>
 #include <gphoto2/gphoto2.h>
-#include <string>
 #include <iterator>
+#include <string>
 
 class Gphoto2Error : public std::exception {
   private:
@@ -51,12 +51,14 @@ class GphotoCameraWidget {
     class Children;
     Children children();
 
-    class child_iterator : public std::iterator<std::input_iterator_tag, GphotoCameraWidget> {
+    class child_iterator
+        : public std::iterator<std::input_iterator_tag, GphotoCameraWidget> {
       public:
-        child_iterator& operator++();
-        bool operator==(const child_iterator& rhs) const;
-        bool operator!=(const child_iterator& rhs) const;
+        child_iterator &operator++();
+        bool operator==(const child_iterator &rhs) const;
+        bool operator!=(const child_iterator &rhs) const;
         GphotoCameraWidget operator*();
+
       private:
         child_iterator(CameraWidget *widget, int n);
         CameraWidget *widget;
@@ -68,6 +70,7 @@ class GphotoCameraWidget {
       public:
         child_iterator begin();
         child_iterator end();
+
       private:
         Children(CameraWidget *widget);
         CameraWidget *widget;
