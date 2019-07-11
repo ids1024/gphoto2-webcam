@@ -9,16 +9,15 @@
 #define HEIGHT 640
 
 class Gphoto2Error : public std::exception {
-    std::string func;
-    int err;
+  private:
+    std::string message;
 
   public:
     Gphoto2Error(std::string func, int err) {
-        this->func = func;
-        this->err = err;
+        message = func + ": " + std::string(gp_result_as_string(err));
     }
     const char *what() const throw() {
-        return (func + ": " + std::to_string(err)).c_str();
+        return message.c_str();
     }
 };
 
@@ -46,28 +45,24 @@ int main() {
     Camera *camera;
     ret = gp_camera_new(&camera);
     if (ret != GP_OK) {
-        fprintf(stderr, "gp_camera_new: %d\n", ret);
-        return 1;
+        throw Gphoto2Error("gp_camera_new", ret);
     }
 
     ret = gp_camera_init(camera, ctx);
     if (ret != GP_OK) {
-        fprintf(stderr, "gp_camera_init: %d\n", ret);
-        return 1;
+        throw Gphoto2Error("gp_camera_init", ret);
     }
 
     CameraWidget *window;
     ret = gp_camera_get_config(camera, &window, ctx);
     if (ret != GP_OK) {
-        fprintf(stderr, "gp_camera_get_config: %d\n", ret);
-        return 1;
+        throw Gphoto2Error("gp_camera_get_config", ret);
     }
     for (int i = 0; i < gp_widget_count_children(window); i++) {
         CameraWidget *child;
         ret = gp_widget_get_child(window, i, &child);
         if (ret != GP_OK) {
-            fprintf(stderr, "gp_widget_get_child: %d\n", ret);
-            return 1;
+            throw Gphoto2Error("gp_widget_get_child", ret);
         }
         const char *name;
         gp_widget_get_name(child, &name);
