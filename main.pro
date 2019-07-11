@@ -1,2 +1,2 @@
-SOURCES = main.cpp V4l2Loopback.cpp
+SOURCES = main.cpp V4l2Loopback.cpp gphoto2cpp.cpp
 LIBS = -lgphoto2
