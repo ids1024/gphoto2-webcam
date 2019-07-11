@@ -4,6 +4,7 @@
 #include <exception>
 #include <gphoto2/gphoto2.h>
 #include <string>
+#include <iterator>
 
 class Gphoto2Error : public std::exception {
   private:
@@ -33,8 +34,49 @@ class GphotoCameraFile {
     ~GphotoCameraFile();
     GphotoCameraFile &operator=(const GphotoCameraFile &) = delete;
     void get_data_and_size(const char **data, unsigned long int *size);
+
   private:
     CameraFile *file;
+    friend class GphotoCamera;
+};
+
+class GphotoCameraWidget {
+  public:
+    GphotoCameraWidget(const GphotoCameraWidget &rhs);
+    ~GphotoCameraWidget();
+    GphotoCameraWidget &operator=(const GphotoCameraWidget &) = delete;
+    const char *get_name();
+    bool get_readonly();
+
+    class Children;
+    Children children();
+
+    class child_iterator : public std::iterator<std::input_iterator_tag, GphotoCameraWidget> {
+      public:
+        child_iterator& operator++();
+        bool operator==(const child_iterator& rhs) const;
+        bool operator!=(const child_iterator& rhs) const;
+        GphotoCameraWidget operator*();
+      private:
+        child_iterator(CameraWidget *widget, int n);
+        CameraWidget *widget;
+        int n;
+        friend class Children;
+    };
+
+    class Children {
+      public:
+        child_iterator begin();
+        child_iterator end();
+      private:
+        Children(CameraWidget *widget);
+        CameraWidget *widget;
+        friend class GphotoCameraWidget;
+    };
+
+  private:
+    GphotoCameraWidget(CameraWidget *widget);
+    CameraWidget *widget;
     friend class GphotoCamera;
 };
 
@@ -44,7 +86,7 @@ class GphotoCamera {
     GphotoCamera(const GphotoCamera &rhs);
     ~GphotoCamera();
     GphotoCamera &operator=(const GphotoCamera &) = delete;
-    CameraWidget *get_config();
+    GphotoCameraWidget get_config();
     void init();
     GphotoCameraFile capture_preview();
 

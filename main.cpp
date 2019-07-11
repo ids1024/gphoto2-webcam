@@ -14,17 +14,10 @@ int main() {
     GphotoCamera camera(ctx);
     camera.init();
 
-    /*
-    CameraWidget *window;
-    gpCall(gp_camera_get_config, camera, &window, ctx);
-    for (int i = 0; i < gp_widget_count_children(window); i++) {
-        CameraWidget *child;
-        gpCall(gp_widget_get_child, window, i, &child);
-        const char *name;
-        gp_widget_get_name(child, &name);
-        printf("%s\n", name);
+    GphotoCameraWidget window = camera.get_config();
+    for (GphotoCameraWidget child : window.children()) {
+        printf("%s\n", child.get_name());
     }
-    */
 
     V4l2Loopback loopback("/dev/video0");
     loopback.set_vidformat(HEIGHT, WIDTH);
