@@ -21,49 +21,35 @@ class Gphoto2Error : public std::exception {
     }
 };
 
+template <typename F, typename... Args>
+void _gpCall(const char *name, F f, Args... args) {
+    int ret = f(args...);
+    if (ret != GP_OK) {
+        throw Gphoto2Error(name, ret);
+    }
+}
+#define gpCall(f, ...) ((_gpCall(#f, ((f)), __VA_ARGS__)))
+
 void capture_preview(Camera *camera, CameraFile **file, const char **data,
                      unsigned long int *size, GPContext *ctx) {
-    int ret;
-
-    ret = gp_file_new(file);
-    if (ret != GP_OK) {
-        throw Gphoto2Error("gp_file_new", ret);
-    }
+    gpCall(gp_file_new, file);
     gp_camera_capture_preview(camera, *file, ctx);
-
-    ret = gp_file_get_data_and_size(*file, data, size);
-    if (ret != GP_OK) {
-        throw Gphoto2Error("gp_camera_capture_preview", ret);
-    }
+    gpCall(gp_file_get_data_and_size, *file, data, size);
 }
 
 int main() {
-    int ret;
-
     GPContext *ctx = gp_context_new();
 
     Camera *camera;
-    ret = gp_camera_new(&camera);
-    if (ret != GP_OK) {
-        throw Gphoto2Error("gp_camera_new", ret);
-    }
+    gpCall(gp_camera_new, &camera);
 
-    ret = gp_camera_init(camera, ctx);
-    if (ret != GP_OK) {
-        throw Gphoto2Error("gp_camera_init", ret);
-    }
+    gpCall(gp_camera_init, camera, ctx);
 
     CameraWidget *window;
-    ret = gp_camera_get_config(camera, &window, ctx);
-    if (ret != GP_OK) {
-        throw Gphoto2Error("gp_camera_get_config", ret);
-    }
+    gpCall(gp_camera_get_config, camera, &window, ctx);
     for (int i = 0; i < gp_widget_count_children(window); i++) {
         CameraWidget *child;
-        ret = gp_widget_get_child(window, i, &child);
-        if (ret != GP_OK) {
-            throw Gphoto2Error("gp_widget_get_child", ret);
-        }
+        gpCall(gp_widget_get_child, window, i, &child);
         const char *name;
         gp_widget_get_name(child, &name);
         printf("%s\n", name);
