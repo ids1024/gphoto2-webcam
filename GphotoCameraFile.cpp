@@ -1,4 +1,4 @@
-#include "gphoto2cpp-internal.h"
+#include "gpCall.h"
 
 GphotoCameraFile::GphotoCameraFile() {
     gpCall(gp_file_new, &file);

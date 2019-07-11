@@ -1,4 +1,4 @@
-#include "gphoto2cpp-internal.h"
+#include "gpCall.h"
 
 GphotoCamera::GphotoCamera(GphotoContext ctx) : ctx(ctx) {
     gpCall(gp_camera_new, &camera);

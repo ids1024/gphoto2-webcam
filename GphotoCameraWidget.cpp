@@ -1,4 +1,4 @@
-#include "gphoto2cpp-internal.h"
+#include "gpCall.h"
 
 GphotoCameraWidget::GphotoCameraWidget(const GphotoCameraWidget &rhs)
     : widget(rhs.widget) {
