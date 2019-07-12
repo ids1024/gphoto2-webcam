@@ -62,28 +62,36 @@ class QGphotoWidgetSection : public QGphotoWidget {
 
 class QGphotoWidgetRange : public QGphotoWidget {
   private:
-    QGphotoWidgetRange(GphotoCameraWidget &cWidget) {
+    QGphotoWidgetRange(GphotoCameraWidget &cWidget) : cWidget(cWidget) {
+        slider = new QSlider(Qt::Horizontal);
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(slider);
+        loadValue();
+    }
+    void loadValue() {
         float min, max, increment;
         cWidget.get_range(&min, &max, &increment);
-        QSlider *widget = new QSlider(Qt::Horizontal);
-        widget->setRange(int(min / increment), int(max / increment));
-        widget->setValue(int(cWidget.get_value<float>() / increment));
-
-        QStackedLayout *layout = new QStackedLayout(this);
-        layout->addWidget(widget);
+        slider->setRange(int(min / increment), int(max / increment));
+        slider->setValue(int(cWidget.get_value<float>() / increment));
     }
+    GphotoCameraWidget cWidget;
+    QSlider *slider;
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetToggle : public QGphotoWidget {
   private:
-    QGphotoWidgetToggle(GphotoCameraWidget &cWidget) {
-        QCheckBox *widget = new QCheckBox(cWidget.get_label());
-        widget->setChecked(cWidget.get_value<bool>());
-
+    QGphotoWidgetToggle(GphotoCameraWidget &cWidget) : cWidget(cWidget) {
+        checkBox = new QCheckBox(cWidget.get_label());
         QStackedLayout *layout = new QStackedLayout(this);
-        layout->addWidget(widget);
+        layout->addWidget(checkBox);
+        loadValue();
     }
+    void loadValue() {
+        checkBox->setChecked(cWidget.get_value<bool>());
+    }
+    GphotoCameraWidget cWidget;
+    QCheckBox *checkBox;
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
