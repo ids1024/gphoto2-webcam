@@ -14,7 +14,7 @@
 
 class QGphotoWidget : public QWidget {
   protected:
-    QGphotoWidget(){ };
+    QGphotoWidget(){};
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
@@ -95,7 +95,7 @@ class QGphotoWidgetToggle : public QGphotoWidget {
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
-class QGphotoWidgetMenu: public QGphotoWidget {
+class QGphotoWidgetMenu : public QGphotoWidget {
   private:
     QGphotoWidgetMenu(GphotoCameraWidget &cWidget) : cWidget(cWidget) {
         comboBox = new QComboBox();
@@ -118,7 +118,7 @@ class QGphotoWidgetMenu: public QGphotoWidget {
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
-class QGphotoWidgetButton: public QGphotoWidget {
+class QGphotoWidgetButton : public QGphotoWidget {
   private:
     QGphotoWidgetButton(GphotoCameraWidget &cWidget) {
         QStackedLayout *layout = new QStackedLayout(this);
