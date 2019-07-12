@@ -18,6 +18,7 @@ class GphotoCamera {
   private:
     GphotoContext ctx;
     Camera *camera;
+    friend class GphotoCameraWidget;
 };
 
 #endif

@@ -1,5 +1,17 @@
 #include "GphotoCameraWidget.h"
+#include "GphotoCamera.h"
 #include "gpCall.h"
+
+static std::string get_full_name(CameraWidget *widget) {
+    CameraWidget *parent;
+    const char *name;
+    gp_widget_get_parent(widget, &parent);
+    gp_widget_get_name(widget, &name);
+    if (parent == NULL)
+        return "/" + std::string(name);
+    else
+        return get_full_name(parent) + "/" + std::string(name);
+}
 
 GphotoCameraWidget::GphotoCameraWidget(const GphotoCameraWidget &rhs)
     : widget(rhs.widget) {
@@ -36,6 +48,18 @@ CameraWidgetType GphotoCameraWidget::get_type() {
 
 void GphotoCameraWidget::get_range(float *min, float *max, float *increment) {
     gpCall(gp_widget_get_range, widget, min, max, increment);
+}
+
+void GphotoCameraWidget::write_to_camera(GphotoCamera &camera) {
+    std::string name = get_full_name(widget);
+    gpCall(gp_camera_set_single_config, camera.camera, name.c_str(), widget, camera.ctx.ctx);
+}
+
+void GphotoCameraWidget::read_from_camera(GphotoCamera &camera) {
+    std::string name = get_full_name(widget);
+    CameraWidget *new_widget;
+    gpCall(gp_camera_get_single_config, camera.camera, name.c_str(), &new_widget, camera.ctx.ctx);
+    widget = new_widget;
 }
 
 GphotoCameraWidget::children GphotoCameraWidget::get_children() {

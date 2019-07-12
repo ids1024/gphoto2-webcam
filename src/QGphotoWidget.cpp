@@ -5,20 +5,29 @@
 #include "GphotoCameraWidget.h"
 #include "QGphotoWidget.h"
 
+int cameraSettingUpdatedEvent;
+
 class QGphotoWidgetWindow : public QGphotoWidget {
   private:
     QGphotoWidgetWindow(GphotoCameraWidget &cWidget) {
-        auto widget = new QTabWidget();
+        tabWidget = new QTabWidget();
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
                 QWidget *child_widget = create_qgphoto_widget(child);
                 if (child_widget != NULL)
-                    widget->addTab(child_widget, child.get_label());
+                    tabWidget->addTab(child_widget, child.get_label());
             }
         }
         auto layout = new QStackedLayout(this);
-        layout->addWidget(widget);
+        layout->addWidget(tabWidget);
     }
+    void loadValue() {
+	for (int i = 0; i < tabWidget->count(); i++) {
+	    auto item = (QGphotoWidget*)tabWidget->widget(i);
+	    item->loadValue();
+	}
+    }
+    QTabWidget *tabWidget;
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
@@ -40,6 +49,12 @@ class QGphotoWidgetSection : public QGphotoWidget {
 
         auto layout = new QStackedLayout(this);
         layout->addWidget(scrollArea);
+    }
+    void loadValue() {
+	for (int i = 0; i < vbox->count(); i++) {
+	    auto item = (QGphotoWidget*)(vbox->itemAt(i)->widget());
+	    item->loadValue();
+	}
     }
     QVBoxLayout *vbox;
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
@@ -87,6 +102,10 @@ class QGphotoWidgetMenu : public QGphotoWidget {
         auto layout = new QStackedLayout(this);
         layout->addWidget(comboBox);
         loadValue();
+	QObject::connect(comboBox, QOverload<const QString &>::of(&QComboBox::activated), [=](const QString &text) {
+	    this->cWidget.set_value<char *>(text.toUtf8().data());
+            loadAllValues();
+	});
     }
     void loadValue() {
         const char *selected = cWidget.get_value<const char *>();
@@ -109,6 +128,7 @@ class QGphotoWidgetButton : public QGphotoWidget {
         auto layout = new QStackedLayout(this);
         layout->addWidget(new QPushButton(cWidget.get_label()));
     }
+    void loadValue() {}
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 

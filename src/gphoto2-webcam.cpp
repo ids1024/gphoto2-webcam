@@ -12,8 +12,9 @@
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
 
-    GphotoContext ctx;
+    cameraSettingUpdatedEvent = QEvent::registerEventType();
 
+    GphotoContext ctx;
     GphotoCamera camera(ctx);
     camera.init();
 

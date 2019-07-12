@@ -4,6 +4,10 @@
 #include <gphoto2/gphoto2.h>
 #include <iterator>
 
+#include "GphotoError.h"
+
+class GphotoCamera;
+
 class GphotoCameraWidget {
   public:
     GphotoCameraWidget(const GphotoCameraWidget &rhs);
@@ -15,10 +19,21 @@ class GphotoCameraWidget {
     CameraWidgetType get_type();
     template <class T> T get_value() {
         T value;
-        gp_widget_get_value(widget, &value);
+        int ret = gp_widget_get_value(widget, &value);
+        if (ret != GP_OK) {
+            throw GphotoError("gp_widget_get_value", ret);
+        }
         return value;
     }
+    template <class T> void set_value(T value) {
+        int ret = gp_widget_set_value(widget, value);
+        if (ret != GP_OK) {
+            throw GphotoError("gp_widget_set_value", ret);
+        }
+    }
     void get_range(float *min, float *max, float *increment);
+    void write_to_camera(GphotoCamera &camera);
+    void read_from_camera(GphotoCamera &camera);
 
     class children;
     children get_children();

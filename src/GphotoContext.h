@@ -13,6 +13,7 @@ class GphotoContext {
   private:
     GPContext *ctx;
     friend class GphotoCamera;
+    friend class GphotoCameraWidget;
 };
 
 #endif
