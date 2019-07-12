@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
     QWidget *window = create_qgphoto_widget(config);
 
     window->show();
-    window->setWindowTitle("Gphoto2-V4L2");
+    window->setWindowTitle("Gphoto2-Webcam");
     return app.exec();
 
     /*
