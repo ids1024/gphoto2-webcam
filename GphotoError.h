@@ -12,11 +12,11 @@ class GphotoError : public std::exception {
 
   public:
     inline GphotoError(std::string func, int err) {
-      message = func + ": " + std::string(gp_result_as_string(err));
+        message = func + ": " + std::string(gp_result_as_string(err));
     }
 
     inline const char *what() const throw() {
-      return message.c_str();
+        return message.c_str();
     }
 };
 

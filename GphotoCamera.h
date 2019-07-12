@@ -1,9 +1,9 @@
 #ifndef GPHOTO_CAMERA_H
 #define GPHOTO_CAMERA_H
 
-#include "GphotoContext.h"
-#include "GphotoCameraWidget.h"
 #include "GphotoCameraFile.h"
+#include "GphotoCameraWidget.h"
+#include "GphotoContext.h"
 
 class GphotoCamera {
   public:

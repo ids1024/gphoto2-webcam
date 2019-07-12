@@ -11,4 +11,3 @@ GphotoContext::GphotoContext(const GphotoContext &rhs) : ctx(rhs.ctx) {
 GphotoContext::~GphotoContext() {
     gp_context_unref(ctx);
 }
-
