@@ -13,18 +13,16 @@
 #define HEIGHT 640
 
 class QGphotoWidget : public QWidget {
-  private:
-    QGphotoWidget(QWidget *inner) {
-        QStackedLayout *layout = new QStackedLayout;
-        layout->addWidget(inner);
-        setLayout(layout);
-    }
+  protected:
+    QGphotoWidget(){ };
     friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
-QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
-    switch (cWidget.get_type()) {
-    case GP_WIDGET_WINDOW: {
+QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+
+class QGphotoWidgetWindow : public QGphotoWidget {
+  private:
+    QGphotoWidgetWindow(GphotoCameraWidget &cWidget) {
         QTabWidget *widget = new QTabWidget();
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
@@ -33,10 +31,16 @@ QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
                     widget->addTab(child_widget, child.get_label());
             }
         }
-        return new QGphotoWidget(widget);
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(widget);
     }
-    case GP_WIDGET_SECTION: {
-        QVBoxLayout *vbox = new QVBoxLayout;
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+class QGphotoWidgetSection : public QGphotoWidget {
+  private:
+    QGphotoWidgetSection(GphotoCameraWidget &cWidget) {
+        vbox = new QVBoxLayout;
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
                 QWidget *child_widget = create_qgphoto_widget(child);
@@ -44,45 +48,100 @@ QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
                     vbox->addWidget(create_qgphoto_widget(child));
             }
         }
-        if (vbox->count() == 0) {
-            delete vbox;
-            return NULL;
-        }
         QWidget *widget = new QWidget();
         widget->setLayout(vbox);
         QScrollArea *scrollArea = new QScrollArea();
         scrollArea->setWidget(widget);
-        return new QGphotoWidget(scrollArea);
+
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(scrollArea);
     }
-    case GP_WIDGET_TEXT:
-        return NULL;
-    case GP_WIDGET_RANGE: {
+    QVBoxLayout *vbox;
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+class QGphotoWidgetRange : public QGphotoWidget {
+  private:
+    QGphotoWidgetRange(GphotoCameraWidget &cWidget) {
         float min, max, increment;
         cWidget.get_range(&min, &max, &increment);
         QSlider *widget = new QSlider(Qt::Horizontal);
         widget->setRange(int(min / increment), int(max / increment));
         widget->setValue(int(cWidget.get_value<float>() / increment));
-        return new QGphotoWidget(widget);
+
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(widget);
     }
-    case GP_WIDGET_TOGGLE: {
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+class QGphotoWidgetToggle : public QGphotoWidget {
+  private:
+    QGphotoWidgetToggle(GphotoCameraWidget &cWidget) {
         QCheckBox *widget = new QCheckBox(cWidget.get_label());
         widget->setChecked(cWidget.get_value<bool>());
-        return new QGphotoWidget(widget);
+
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(widget);
     }
-    case GP_WIDGET_RADIO:
-    case GP_WIDGET_MENU: {
-        QComboBox *widget = new QComboBox();
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+class QGphotoWidgetMenu: public QGphotoWidget {
+  private:
+    QGphotoWidgetMenu(GphotoCameraWidget &cWidget) : cWidget(cWidget) {
+        comboBox = new QComboBox();
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(comboBox);
+        loadValue();
+    }
+    void loadValue() {
         const char *selected = cWidget.get_value<const char *>();
+        comboBox->clear();
         for (const char *choice : cWidget.get_choices()) {
-            widget->addItem(choice);
+            comboBox->addItem(choice);
             if (strcmp(choice, selected) == 0) {
-                widget->setCurrentIndex(widget->count() - 1);
+                comboBox->setCurrentIndex(comboBox->count() - 1);
             }
         }
-        return new QGphotoWidget(widget);
     }
+    GphotoCameraWidget cWidget;
+    QComboBox *comboBox;
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+class QGphotoWidgetButton: public QGphotoWidget {
+  private:
+    QGphotoWidgetButton(GphotoCameraWidget &cWidget) {
+        QStackedLayout *layout = new QStackedLayout(this);
+        layout->addWidget(new QPushButton(cWidget.get_label()));
+    }
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
+    switch (cWidget.get_type()) {
+    case GP_WIDGET_WINDOW:
+        return new QGphotoWidgetWindow(cWidget);
+    case GP_WIDGET_SECTION: {
+        QGphotoWidgetSection *widget = new QGphotoWidgetSection(cWidget);
+        if (widget->vbox->count() == 0) {
+            delete widget;
+            return NULL;
+        }
+        return widget;
+    }
+    case GP_WIDGET_TEXT:
+        return NULL;
+    case GP_WIDGET_RANGE:
+        return new QGphotoWidgetRange(cWidget);
+    case GP_WIDGET_TOGGLE:
+        return new QGphotoWidgetToggle(cWidget);
+    case GP_WIDGET_RADIO:
+    case GP_WIDGET_MENU:
+        return new QGphotoWidgetMenu(cWidget);
     case GP_WIDGET_BUTTON:
-        return new QGphotoWidget(new QPushButton(cWidget.get_label()));
+        return new QGphotoWidgetButton(cWidget);
     case GP_WIDGET_DATE:
         return NULL;
     }
