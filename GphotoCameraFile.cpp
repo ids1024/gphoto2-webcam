@@ -1,3 +1,4 @@
+#include "GphotoCameraFile.h"
 #include "gpCall.h"
 
 GphotoCameraFile::GphotoCameraFile() {

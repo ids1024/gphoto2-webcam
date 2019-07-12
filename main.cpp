@@ -2,8 +2,12 @@
 #include <stdio.h>
 #include <string>
 
+#include <QtWidgets>
+
 #include "V4l2Loopback.h"
-#include "gphoto2cpp.h"
+#include "GphotoCamera.h"
+#include "GphotoCameraFile.h"
+#include "GphotoCameraWidget.h"
 
 #define WIDTH 960
 #define HEIGHT 640

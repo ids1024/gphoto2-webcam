@@ -1,3 +1,4 @@
+#include "GphotoCamera.h"
 #include "gpCall.h"
 
 GphotoCamera::GphotoCamera(GphotoContext ctx) : ctx(ctx) {

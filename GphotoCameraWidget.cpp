@@ -1,3 +1,4 @@
+#include "GphotoCameraWidget.h"
 #include "gpCall.h"
 
 GphotoCameraWidget::GphotoCameraWidget(const GphotoCameraWidget &rhs)
