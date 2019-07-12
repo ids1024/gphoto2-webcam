@@ -12,26 +12,36 @@
 #define WIDTH 960
 #define HEIGHT 640
 
-QWidget *create_config_widget(GphotoCameraWidget &cWidget) {
+class QGphotoWidget : public QWidget {
+  private:
+    QGphotoWidget(QWidget *inner) {
+        QStackedLayout *layout = new QStackedLayout;
+        layout->addWidget(inner);
+        setLayout(layout);
+    }
+    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+};
+
+QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
     switch (cWidget.get_type()) {
     case GP_WIDGET_WINDOW: {
         QTabWidget *widget = new QTabWidget();
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
-                QWidget *child_widget = create_config_widget(child);
+                QWidget *child_widget = create_qgphoto_widget(child);
                 if (child_widget != NULL)
                     widget->addTab(child_widget, child.get_label());
             }
         }
-        return widget;
+        return new QGphotoWidget(widget);
     }
     case GP_WIDGET_SECTION: {
         QVBoxLayout *vbox = new QVBoxLayout;
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
-                QWidget *child_widget = create_config_widget(child);
+                QWidget *child_widget = create_qgphoto_widget(child);
                 if (child_widget != NULL)
-                    vbox->addWidget(create_config_widget(child));
+                    vbox->addWidget(create_qgphoto_widget(child));
             }
         }
         if (vbox->count() == 0) {
@@ -42,7 +52,7 @@ QWidget *create_config_widget(GphotoCameraWidget &cWidget) {
         widget->setLayout(vbox);
         QScrollArea *scrollArea = new QScrollArea();
         scrollArea->setWidget(widget);
-        return scrollArea;
+        return new QGphotoWidget(scrollArea);
     }
     case GP_WIDGET_TEXT:
         return NULL;
@@ -52,12 +62,12 @@ QWidget *create_config_widget(GphotoCameraWidget &cWidget) {
         QSlider *widget = new QSlider(Qt::Horizontal);
         widget->setRange(int(min / increment), int(max / increment));
         widget->setValue(int(cWidget.get_value<float>() / increment));
-        return widget;
+        return new QGphotoWidget(widget);
     }
     case GP_WIDGET_TOGGLE: {
         QCheckBox *widget = new QCheckBox(cWidget.get_label());
         widget->setChecked(cWidget.get_value<bool>());
-        return widget;
+        return new QGphotoWidget(widget);
     }
     case GP_WIDGET_RADIO:
     case GP_WIDGET_MENU: {
@@ -69,10 +79,10 @@ QWidget *create_config_widget(GphotoCameraWidget &cWidget) {
                 widget->setCurrentIndex(widget->count() - 1);
             }
         }
-        return widget;
+        return new QGphotoWidget(widget);
     }
     case GP_WIDGET_BUTTON:
-        return new QPushButton(cWidget.get_label());
+        return new QGphotoWidget(new QPushButton(cWidget.get_label()));
     case GP_WIDGET_DATE:
         return NULL;
     }
@@ -89,7 +99,7 @@ int main(int argc, char **argv) {
     camera.init();
 
     GphotoCameraWidget config = camera.get_config();
-    QWidget *window = create_config_widget(config);
+    QWidget *window = create_qgphoto_widget(config);
 
     window->show();
     window->setWindowTitle("Gphoto2-V4L2");
