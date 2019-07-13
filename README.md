@@ -9,6 +9,6 @@ Building
 --------
 
 ```
-qmake-qt5
+qmake
 make
 ```
