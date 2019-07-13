@@ -1,7 +1,0 @@
-dist: xenial
-sudo: required
-before_install:
-  - sudo apt-get install -y qt5-qmake qtbase5-dev libgphoto2-dev
-script:
-  - qmake
-  - make
