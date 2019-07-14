@@ -1,5 +1,5 @@
-#ifndef GPHOTO2CPP_INTERNAL_H
-#define GPHOTO2CPP_INTERNAL_H
+#ifndef GPCALL_H
+#define GPCALL_H
 
 #include "GphotoError.h"
 
