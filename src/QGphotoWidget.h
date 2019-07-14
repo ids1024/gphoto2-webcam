@@ -8,7 +8,7 @@ class QGphotoWidget : public QWidget {
     virtual void loadValue() = 0;
   protected:
     QGphotoWidget(){};
-    bool event(QEvent *event) {
+    bool event(QEvent *event) override {
         if (event->type() == cameraSettingUpdatedEvent) {
             loadValue();
             return true;
