@@ -13,57 +13,48 @@ static std::string get_full_name(CameraWidget *widget) {
         return get_full_name(parent) + "/" + std::string(name);
 }
 
-GphotoCameraWidget::GphotoCameraWidget(const GphotoCameraWidget &rhs)
-    : widget(rhs.widget) {
-    gp_widget_ref(widget);
-}
-
-GphotoCameraWidget::~GphotoCameraWidget() {
-    gp_widget_unref(widget);
-}
-
 const char *GphotoCameraWidget::get_name() {
     const char *name;
-    gpCall(gp_widget_get_name, widget, &name);
+    gpCall(gp_widget_get_name, widget.get(), &name);
     return name;
 }
 
 const char *GphotoCameraWidget::get_label() {
     const char *label;
-    gpCall(gp_widget_get_label, widget, &label);
+    gpCall(gp_widget_get_label, widget.get(), &label);
     return label;
 }
 
 bool GphotoCameraWidget::get_readonly() {
     int readonly;
-    gpCall(gp_widget_get_readonly, widget, &readonly);
+    gpCall(gp_widget_get_readonly, widget.get(), &readonly);
     return readonly;
 }
 
 CameraWidgetType GphotoCameraWidget::get_type() {
     CameraWidgetType type;
-    gpCall(gp_widget_get_type, widget, &type);
+    gpCall(gp_widget_get_type, widget.get(), &type);
     return type;
 }
 
 void GphotoCameraWidget::get_range(float *min, float *max, float *increment) {
-    gpCall(gp_widget_get_range, widget, min, max, increment);
+    gpCall(gp_widget_get_range, widget.get(), min, max, increment);
 }
 
 void GphotoCameraWidget::write_to_camera(GphotoCamera &camera) {
-    std::string name = get_full_name(widget);
-    gpCall(gp_camera_set_single_config, camera.camera, name.c_str(), widget, camera.ctx.ctx);
+    std::string name = get_full_name(widget.get());
+    gpCall(gp_camera_set_single_config, camera.camera.get(), name.c_str(), widget.get(), camera.ctx.ctx.get());
 }
 
 void GphotoCameraWidget::read_from_camera(GphotoCamera &camera) {
-    std::string name = get_full_name(widget);
+    std::string name = get_full_name(widget.get());
     CameraWidget *new_widget;
-    gpCall(gp_camera_get_single_config, camera.camera, name.c_str(), &new_widget, camera.ctx.ctx);
+    gpCall(gp_camera_get_single_config, camera.camera.get(), name.c_str(), &new_widget, camera.ctx.ctx.get());
     widget = new_widget;
 }
 
 GphotoCameraWidget::children GphotoCameraWidget::get_children() {
-    return children(widget);
+    return children(widget.get());
 }
 
 GphotoCameraWidget::child_iterator &GphotoCameraWidget::child_iterator::
@@ -104,7 +95,7 @@ GphotoCameraWidget::child_iterator GphotoCameraWidget::children::end() {
 };
 
 GphotoCameraWidget::choices GphotoCameraWidget::get_choices() {
-    return choices(widget);
+    return choices(widget.get());
 }
 
 GphotoCameraWidget::choice_iterator &GphotoCameraWidget::choice_iterator::

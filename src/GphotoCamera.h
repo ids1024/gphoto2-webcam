@@ -4,20 +4,18 @@
 #include "GphotoCameraFile.h"
 #include "GphotoCameraWidget.h"
 #include "GphotoContext.h"
+#include "GphotoRefCount.h"
 
 class GphotoCamera {
   public:
     GphotoCamera(GphotoContext ctx);
-    GphotoCamera(const GphotoCamera &rhs);
-    ~GphotoCamera();
-    GphotoCamera &operator=(const GphotoCamera &) = delete;
     GphotoCameraWidget get_config();
     void init();
     GphotoCameraFile capture_preview();
 
   private:
     GphotoContext ctx;
-    Camera *camera;
+    GphotoRefCount<Camera, gp_camera_ref, gp_camera_unref> camera;
     friend class GphotoCameraWidget;
 };
 

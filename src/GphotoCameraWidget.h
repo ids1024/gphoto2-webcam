@@ -5,28 +5,26 @@
 #include <iterator>
 
 #include "GphotoError.h"
+#include "GphotoRefCount.h"
 
 class GphotoCamera;
 
 class GphotoCameraWidget {
   public:
-    GphotoCameraWidget(const GphotoCameraWidget &rhs);
-    ~GphotoCameraWidget();
-    GphotoCameraWidget &operator=(const GphotoCameraWidget &) = delete;
     const char *get_name();
     const char *get_label();
     bool get_readonly();
     CameraWidgetType get_type();
     template <class T> T get_value() {
         T value;
-        int ret = gp_widget_get_value(widget, &value);
+        int ret = gp_widget_get_value(widget.get(), &value);
         if (ret != GP_OK) {
             throw GphotoError("gp_widget_get_value", ret);
         }
         return value;
     }
     template <class T> void set_value(T value) {
-        int ret = gp_widget_set_value(widget, value);
+        int ret = gp_widget_set_value(widget.get(), value);
         if (ret != GP_OK) {
             throw GphotoError("gp_widget_set_value", ret);
         }
@@ -95,7 +93,7 @@ class GphotoCameraWidget {
 
   private:
     GphotoCameraWidget(CameraWidget *widget);
-    CameraWidget *widget;
+    GphotoRefCount<CameraWidget, gp_widget_ref, gp_widget_unref> widget;
     friend class GphotoCamera;
 };
 

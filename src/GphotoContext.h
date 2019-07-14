@@ -3,15 +3,13 @@
 
 #include <gphoto2/gphoto2.h>
 
+#include "GphotoRefCount.h"
+
 class GphotoContext {
   public:
     GphotoContext();
-    GphotoContext(const GphotoContext &rhs);
-    ~GphotoContext();
-    GphotoContext &operator=(const GphotoContext &) = delete;
-
   private:
-    GPContext *ctx;
+    GphotoRefCount<GPContext, gp_context_ref, gp_context_unref> ctx;
     friend class GphotoCamera;
     friend class GphotoCameraWidget;
 };

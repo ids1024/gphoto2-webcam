@@ -1,30 +1,26 @@
 #include "GphotoCamera.h"
 #include "gpCall.h"
 
-GphotoCamera::GphotoCamera(GphotoContext ctx) : ctx(ctx) {
+inline Camera *camera_new() {
+    Camera *camera;
     gpCall(gp_camera_new, &camera);
+    return camera;
 }
 
-GphotoCamera::GphotoCamera(const GphotoCamera &rhs)
-    : ctx(rhs.ctx), camera(rhs.camera) {
-    gp_camera_ref(camera);
-}
+GphotoCamera::GphotoCamera(GphotoContext ctx) : ctx(ctx), camera(camera_new()) {}
 
-GphotoCamera::~GphotoCamera() {
-    gp_camera_unref(camera);
-}
 GphotoCameraWidget GphotoCamera::get_config() {
     CameraWidget *window;
-    gpCall(gp_camera_get_config, camera, &window, ctx.ctx);
+    gpCall(gp_camera_get_config, camera.get(), &window, ctx.ctx.get());
     return GphotoCameraWidget(window);
 }
 
 void GphotoCamera::init() {
-    gpCall(gp_camera_init, camera, ctx.ctx);
+    gpCall(gp_camera_init, camera.get(), ctx.ctx.get());
 }
 
 GphotoCameraFile GphotoCamera::capture_preview() {
     GphotoCameraFile file;
-    gp_camera_capture_preview(camera, file.file, ctx.ctx);
+    gp_camera_capture_preview(camera.get(), file.file.get(), ctx.ctx.get());
     return file;
 }
