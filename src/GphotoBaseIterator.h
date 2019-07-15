@@ -28,4 +28,19 @@ class GphotoBaseIterator {
     int n;
 };
 
+template <typename T, typename Iter>
+class GphotoBaseIterable {
+  public:
+    inline Iter begin() {
+        return Iter(obj, 0);
+    }
+    inline Iter end() {
+        return Iter(obj, count());
+    }
+  protected:
+    inline GphotoBaseIterable(T *obj) : obj(obj) {};
+    virtual int count() = 0;
+    T *obj;
+};
+
 #endif

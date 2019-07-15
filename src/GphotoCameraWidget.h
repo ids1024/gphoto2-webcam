@@ -34,9 +34,6 @@ class GphotoCameraWidget {
     void write_to_camera(GphotoCamera &camera);
     void read_from_camera(GphotoCamera &camera);
 
-    class children;
-    children get_children();
-
     class choice_iterator : public GphotoBaseIterator<CameraWidget, const char*> {
       public:
         using GphotoBaseIterator::GphotoBaseIterator;
@@ -64,30 +61,24 @@ class GphotoCameraWidget {
         }
     };
 
-    class children {
-      public:
-        child_iterator begin();
-        child_iterator end();
-
-      private:
-        children(CameraWidget *widget);
-        CameraWidget *widget;
+    class children : public GphotoBaseIterable<CameraWidget, child_iterator> {
+        using GphotoBaseIterable::GphotoBaseIterable;
+        inline int count() {
+            return gp_widget_count_choices(obj);
+        }
         friend class GphotoCameraWidget;
     };
 
-    class choices;
+    class choices : public GphotoBaseIterable<CameraWidget, choice_iterator> {
+        using GphotoBaseIterable::GphotoBaseIterable;
+        inline int count() {
+            return gp_widget_count_choices(obj);
+        }
+        friend class GphotoCameraWidget;
+    };
+
+    children get_children();
     choices get_choices();
-
-    class choices {
-      public:
-        choice_iterator begin();
-        choice_iterator end();
-
-      private:
-        choices(CameraWidget *widget);
-        CameraWidget *widget;
-        friend class GphotoCameraWidget;
-    };
 
   private:
     GphotoCameraWidget(CameraWidget *widget);

@@ -57,30 +57,8 @@ GphotoCameraWidget::children GphotoCameraWidget::get_children() {
     return children(widget.get());
 }
 
-GphotoCameraWidget::children::children(CameraWidget *widget) : widget(widget){};
-
-GphotoCameraWidget::child_iterator GphotoCameraWidget::children::begin() {
-    return GphotoCameraWidget::child_iterator(widget, 0);
-};
-
-GphotoCameraWidget::child_iterator GphotoCameraWidget::children::end() {
-    int count = gp_widget_count_children(widget);
-    return GphotoCameraWidget::child_iterator(widget, count);
-};
-
 GphotoCameraWidget::choices GphotoCameraWidget::get_choices() {
     return choices(widget.get());
-}
-
-GphotoCameraWidget::choices::choices(CameraWidget *widget) : widget(widget){};
-
-GphotoCameraWidget::choice_iterator GphotoCameraWidget::choices::begin() {
-    return GphotoCameraWidget::choice_iterator(widget, 0);
-};
-
-GphotoCameraWidget::choice_iterator GphotoCameraWidget::choices::end() {
-    int count = gp_widget_count_choices(widget);
-    return GphotoCameraWidget::choice_iterator(widget, count);
 }
 
 GphotoCameraWidget::GphotoCameraWidget(CameraWidget *widget) : widget(widget){};
