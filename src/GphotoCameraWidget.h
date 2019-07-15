@@ -6,6 +6,7 @@
 
 #include "GphotoError.h"
 #include "GphotoRefCount.h"
+#include "GphotoBaseIterator.h"
 
 class GphotoCamera;
 
@@ -36,19 +37,31 @@ class GphotoCameraWidget {
     class children;
     children get_children();
 
-    class child_iterator
-        : public std::iterator<std::input_iterator_tag, GphotoCameraWidget> {
+    class choice_iterator : public GphotoBaseIterator<CameraWidget, const char*> {
       public:
-        child_iterator &operator++();
-        bool operator==(const child_iterator &rhs) const;
-        bool operator!=(const child_iterator &rhs) const;
-        GphotoCameraWidget operator*();
+        using GphotoBaseIterator::GphotoBaseIterator;
+        inline const char *operator*() {
+            const char *choice;
+            int ret = gp_widget_get_choice(obj, n, &choice);
+            if (ret != GP_OK) {
+                throw GphotoError("gp_widget_get_choice", ret);
+            }
+            return choice;
+        }
+    };
 
-      private:
-        child_iterator(CameraWidget *widget, int n);
-        CameraWidget *widget;
-        int n;
-        friend class children;
+    class child_iterator : public GphotoBaseIterator<CameraWidget, GphotoCameraWidget> {
+      public:
+        using GphotoBaseIterator::GphotoBaseIterator;
+        inline GphotoCameraWidget operator*() {
+          CameraWidget *child;
+          int ret = gp_widget_get_child(obj, n, &child);
+            if (ret != GP_OK) {
+                throw GphotoError("gp_widget_get_child", ret);
+            }
+          gp_widget_ref(child);
+          return GphotoCameraWidget(child);
+        }
     };
 
     class children {
@@ -64,21 +77,6 @@ class GphotoCameraWidget {
 
     class choices;
     choices get_choices();
-
-    class choice_iterator
-        : public std::iterator<std::input_iterator_tag, const char *> {
-      public:
-        choice_iterator &operator++();
-        bool operator==(const choice_iterator &rhs) const;
-        bool operator!=(const choice_iterator &rhs) const;
-        const char *operator*();
-
-      private:
-        choice_iterator(CameraWidget *widget, int n);
-        CameraWidget *widget;
-        int n;
-        friend class choices;
-    };
 
     class choices {
       public:

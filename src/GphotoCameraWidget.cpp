@@ -57,32 +57,6 @@ GphotoCameraWidget::children GphotoCameraWidget::get_children() {
     return children(widget.get());
 }
 
-GphotoCameraWidget::child_iterator &GphotoCameraWidget::child_iterator::
-operator++() {
-    n++;
-    return *this;
-}
-bool GphotoCameraWidget::child_iterator::
-operator==(const child_iterator &rhs) const {
-    return n == rhs.n;
-}
-
-bool GphotoCameraWidget::child_iterator::
-operator!=(const child_iterator &rhs) const {
-    return n != rhs.n;
-}
-
-GphotoCameraWidget GphotoCameraWidget::child_iterator::operator*() {
-    CameraWidget *child;
-    gpCall(gp_widget_get_child, widget, n, &child);
-    gp_widget_ref(child);
-    return GphotoCameraWidget(child);
-}
-
-GphotoCameraWidget::child_iterator::child_iterator(CameraWidget *widget, int n)
-    : widget(widget), n(n) {
-}
-
 GphotoCameraWidget::children::children(CameraWidget *widget) : widget(widget){};
 
 GphotoCameraWidget::child_iterator GphotoCameraWidget::children::begin() {
@@ -96,32 +70,6 @@ GphotoCameraWidget::child_iterator GphotoCameraWidget::children::end() {
 
 GphotoCameraWidget::choices GphotoCameraWidget::get_choices() {
     return choices(widget.get());
-}
-
-GphotoCameraWidget::choice_iterator &GphotoCameraWidget::choice_iterator::
-operator++() {
-    n++;
-    return *this;
-}
-bool GphotoCameraWidget::choice_iterator::
-operator==(const choice_iterator &rhs) const {
-    return n == rhs.n;
-}
-
-bool GphotoCameraWidget::choice_iterator::
-operator!=(const choice_iterator &rhs) const {
-    return n != rhs.n;
-}
-
-const char *GphotoCameraWidget::choice_iterator::operator*() {
-    const char *choice;
-    gpCall(gp_widget_get_choice, widget, n, &choice);
-    return choice;
-}
-
-GphotoCameraWidget::choice_iterator::choice_iterator(CameraWidget *widget,
-                                                     int n)
-    : widget(widget), n(n) {
 }
 
 GphotoCameraWidget::choices::choices(CameraWidget *widget) : widget(widget){};
