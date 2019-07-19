@@ -4,7 +4,7 @@
 class V4l2Loopback {
   public:
     V4l2Loopback(const char *path);
-    void set_vidformat(int height, int width);
+    void set_vidformat(unsigned height, unsigned width);
     void write_frame(const void *frame, size_t size);
 
   private:

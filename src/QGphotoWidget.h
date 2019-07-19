@@ -19,9 +19,8 @@ class QGphotoWidget : public QWidget {
         QEvent event((QEvent::Type)cameraSettingUpdatedEvent);
         QApplication::sendEvent(window(), &event);
     }
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
-QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+std::optional<std::unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 
 #endif

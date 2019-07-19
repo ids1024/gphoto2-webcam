@@ -24,8 +24,8 @@ class GphotoBaseIterator {
     virtual E operator*() = 0;
     inline GphotoBaseIterator(T *obj, int n) : obj(obj), n(n) {};
   protected:
-    T *obj;
-    int n;
+    T *obj; // NOLINT
+    int n; // NOLINT
 };
 
 template <typename T, typename Iter>
@@ -40,7 +40,7 @@ class GphotoBaseIterable {
   protected:
     inline GphotoBaseIterable(T *obj) : obj(obj) {};
     virtual int count() = 0;
-    T *obj;
+    T *obj; // NOLINT
 };
 
 #endif

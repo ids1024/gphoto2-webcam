@@ -1,7 +1,7 @@
 #include <fcntl.h>
 #include <linux/videodev2.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <sys/ioctl.h>
 #include <system_error>
 #include <unistd.h>
@@ -15,8 +15,8 @@ V4l2Loopback::V4l2Loopback(const char *path) {
     }
 }
 
-void V4l2Loopback::set_vidformat(int height, int width) {
-    struct v4l2_format vid_format;
+void V4l2Loopback::set_vidformat(unsigned height, unsigned width) {
+    struct v4l2_format vid_format; // NOLINT
     memset(&vid_format, 0, sizeof(vid_format));
 
     vid_format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;

@@ -10,6 +10,6 @@ static void _gpCall(const char *name, F f, Args... args) {
         throw GphotoError(name, ret);
     }
 }
-#define gpCall(f, ...) ((_gpCall(#f, ((f)), __VA_ARGS__)))
+#define gpCall(f, ...) ((_gpCall(#f, ((f)), __VA_ARGS__))) // NOLINT
 
 #endif

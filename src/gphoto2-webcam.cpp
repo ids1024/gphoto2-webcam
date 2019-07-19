@@ -6,8 +6,8 @@
 #include "V4l2Loopback.h"
 #include "QGphotoWidget.h"
 
-#define WIDTH 960
-#define HEIGHT 640
+const unsigned WIDTH = 960;
+const unsigned HEIGHT = 640;
 
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     camera.init();
 
     GphotoCameraWidget config = camera.get_config();
-    QWidget *window = create_qgphoto_widget(config);
+    auto window = *create_qgphoto_widget(config);
 
     window->show();
     window->setWindowTitle("Gphoto2-Webcam");

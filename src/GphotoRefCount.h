@@ -5,15 +5,14 @@
 template <typename T, auto &Ref, auto &Unref>
 class GphotoRefCount {
   public:
+    GphotoRefCount() = delete;
     inline GphotoRefCount(T* inner) : inner(inner) {};
     inline GphotoRefCount(const GphotoRefCount &rhs) : inner(rhs.inner) {
         Ref(inner);
     }
+    GphotoRefCount(GphotoRefCount &&rhs) = default;
     inline ~GphotoRefCount() {
         Unref(inner);
-    }
-    inline T* get() const {
-        return inner;
     }
     inline GphotoRefCount &operator=(const GphotoRefCount &rhs) {
         if (this != &rhs) {
@@ -23,7 +22,16 @@ class GphotoRefCount {
         }
         return *this;
     }
-    GphotoRefCount() = delete;
+    inline GphotoRefCount &operator=(GphotoRefCount &&rhs) {
+        if (this != &rhs) {
+            Unref(inner);
+            inner = rhs.inner;
+        }
+        return *this;
+    }
+    inline T* get() const {
+        return inner;
+    }
   private:
     T* inner;
 };

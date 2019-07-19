@@ -1,2 +1,2 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-owning-memory'
 HeaderFilterRegex: '.*'

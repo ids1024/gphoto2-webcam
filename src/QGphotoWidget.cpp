@@ -5,6 +5,10 @@
 #include "GphotoCameraWidget.h"
 #include "QGphotoWidget.h"
 
+using std::unique_ptr;
+using std::make_unique;
+using std::optional;
+
 int cameraSettingUpdatedEvent;
 
 class QGphotoWidgetWindow : public QGphotoWidget {
@@ -13,9 +17,9 @@ class QGphotoWidgetWindow : public QGphotoWidget {
         tabWidget = new QTabWidget();
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
-                QWidget *child_widget = create_qgphoto_widget(child);
-                if (child_widget != NULL)
-                    tabWidget->addTab(child_widget, child.get_label());
+                auto child_widget = create_qgphoto_widget(child);
+                if (child_widget)
+                    tabWidget->addTab(child_widget->release(), child.get_label());
             }
         }
         auto layout = new QStackedLayout(this);
@@ -23,12 +27,12 @@ class QGphotoWidgetWindow : public QGphotoWidget {
     }
     void loadValue() {
 	for (int i = 0; i < tabWidget->count(); i++) {
-	    auto item = (QGphotoWidget*)tabWidget->widget(i);
+	    auto item = dynamic_cast<QGphotoWidget*>(tabWidget->widget(i));
 	    item->loadValue();
 	}
     }
     QTabWidget *tabWidget;
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetSection : public QGphotoWidget {
@@ -37,9 +41,9 @@ class QGphotoWidgetSection : public QGphotoWidget {
         vbox = new QVBoxLayout;
         for (GphotoCameraWidget child : cWidget.get_children()) {
             if (!child.get_readonly()) {
-                QWidget *child_widget = create_qgphoto_widget(child);
-                if (child_widget != NULL)
-                    vbox->addWidget(create_qgphoto_widget(child));
+                auto child_widget = create_qgphoto_widget(child);
+                if (child_widget)
+                    vbox->addWidget(child_widget->release());
             }
         }
         auto widget = new QWidget();
@@ -52,12 +56,12 @@ class QGphotoWidgetSection : public QGphotoWidget {
     }
     void loadValue() {
 	for (int i = 0; i < vbox->count(); i++) {
-	    auto item = (QGphotoWidget*)(vbox->itemAt(i)->widget());
+	    auto item = dynamic_cast<QGphotoWidget*>(vbox->itemAt(i)->widget());
 	    item->loadValue();
 	}
     }
     QVBoxLayout *vbox;
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetRange : public QGphotoWidget {
@@ -68,7 +72,7 @@ class QGphotoWidgetRange : public QGphotoWidget {
         layout->addWidget(slider);
         loadValue();
     }
-    void loadValue() {
+    void loadValue() final {
         float min, max, increment;
         cWidget.get_range(&min, &max, &increment);
         slider->setRange(int(min / increment), int(max / increment));
@@ -76,7 +80,7 @@ class QGphotoWidgetRange : public QGphotoWidget {
     }
     GphotoCameraWidget cWidget;
     QSlider *slider;
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetToggle : public QGphotoWidget {
@@ -87,12 +91,12 @@ class QGphotoWidgetToggle : public QGphotoWidget {
         layout->addWidget(checkBox);
         loadValue();
     }
-    void loadValue() {
+    void loadValue() final {
         checkBox->setChecked(cWidget.get_value<bool>());
     }
     GphotoCameraWidget cWidget;
     QCheckBox *checkBox;
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetMenu : public QGphotoWidget {
@@ -107,7 +111,7 @@ class QGphotoWidgetMenu : public QGphotoWidget {
             loadAllValues();
 	});
     }
-    void loadValue() {
+    void loadValue() final {
         const char *selected = cWidget.get_value<const char *>();
         comboBox->clear();
         for (const char *choice : cWidget.get_choices()) {
@@ -119,7 +123,7 @@ class QGphotoWidgetMenu : public QGphotoWidget {
     }
     GphotoCameraWidget cWidget;
     QComboBox *comboBox;
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
 class QGphotoWidgetButton : public QGphotoWidget {
@@ -129,35 +133,34 @@ class QGphotoWidgetButton : public QGphotoWidget {
         layout->addWidget(new QPushButton(cWidget.get_label()));
     }
     void loadValue() {}
-    friend QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget);
+    friend optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget);
 };
 
-QGphotoWidget *create_qgphoto_widget(GphotoCameraWidget &cWidget) {
+optional<unique_ptr<QGphotoWidget>> create_qgphoto_widget(GphotoCameraWidget &cWidget) {
     switch (cWidget.get_type()) {
     case GP_WIDGET_WINDOW:
-        return new QGphotoWidgetWindow(cWidget);
+        return unique_ptr<QGphotoWidgetWindow>(new QGphotoWidgetWindow(cWidget));
     case GP_WIDGET_SECTION: {
-        auto widget = new QGphotoWidgetSection(cWidget);
+        auto widget = unique_ptr<QGphotoWidgetSection>(new QGphotoWidgetSection(cWidget));
         if (widget->vbox->count() == 0) {
-            delete widget;
-            return NULL;
+            return {};
         }
         return widget;
     }
     case GP_WIDGET_TEXT:
-        return NULL;
+        return {};
     case GP_WIDGET_RANGE:
-        return new QGphotoWidgetRange(cWidget);
+        return unique_ptr<QGphotoWidgetRange>(new QGphotoWidgetRange(cWidget));
     case GP_WIDGET_TOGGLE:
-        return new QGphotoWidgetToggle(cWidget);
+        return unique_ptr<QGphotoWidgetToggle>(new QGphotoWidgetToggle(cWidget));
     case GP_WIDGET_RADIO:
     case GP_WIDGET_MENU:
-        return new QGphotoWidgetMenu(cWidget);
+        return unique_ptr<QGphotoWidgetMenu>(new QGphotoWidgetMenu(cWidget));
     case GP_WIDGET_BUTTON:
-        return new QGphotoWidgetButton(cWidget);
+        return unique_ptr<QGphotoWidgetButton>(new QGphotoWidgetButton(cWidget));
     case GP_WIDGET_DATE:
-        return NULL;
+        return {};
+    default:
+        return {};
     }
-
-    return NULL;
 }
