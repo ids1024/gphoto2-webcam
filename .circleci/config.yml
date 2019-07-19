@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ubuntu:bionic
+      - image: ubuntu:disco
     steps:
       - checkout
       - run: apt-get update && apt-get install -y qt5-default libgphoto2-dev
