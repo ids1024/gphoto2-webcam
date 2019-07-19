@@ -1,6 +1,9 @@
 #ifndef QGPHOTO_WIDGET_H
 #define QGPHOTO_WIDGET_H
 
+#include <memory>
+#include <optional>
+
 extern int cameraSettingUpdatedEvent;
 
 class QGphotoWidget : public QWidget {
