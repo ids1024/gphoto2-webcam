@@ -12,6 +12,10 @@ class GphotoCamera;
 
 class GphotoCameraWidget {
   public:
+    GphotoCameraWidget(CameraWidgetType type, const char *label);
+    template <class T> GphotoCameraWidget(CameraWidgetType type, const char *label, T value) : GphotoCameraWidget(type, label) {
+        set_value(value);
+    }
     const char *get_name();
     const char *get_label();
     bool get_readonly();

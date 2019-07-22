@@ -13,6 +13,14 @@ static std::string get_full_name(CameraWidget *widget) {
         return get_full_name(parent) + "/" + std::string(name);
 }
 
+static CameraWidget *widget_new(CameraWidgetType type, const char *label) {
+    CameraWidget *widget;
+    gpCall(gp_widget_new, type, label, &widget);
+    return widget;
+}
+
+GphotoCameraWidget::GphotoCameraWidget(CameraWidgetType type, const char *label) : widget(widget_new(type, label)) {}
+
 const char *GphotoCameraWidget::get_name() {
     const char *name;
     gpCall(gp_widget_get_name, widget.get(), &name);
