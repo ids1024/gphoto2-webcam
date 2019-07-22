@@ -21,6 +21,10 @@ void GphotoCamera::init() {
 
 GphotoCameraFile GphotoCamera::capture_preview() {
     GphotoCameraFile file;
-    gp_camera_capture_preview(camera.get(), file.file.get(), ctx.ctx.get());
+    gpCall(gp_camera_capture_preview, camera.get(), file.file.get(), ctx.ctx.get());
     return file;
+}
+
+void GphotoCamera::set_single_config(const char *name, GphotoCameraWidget &cWidget) {
+    gpCall(gp_camera_set_single_config, camera.get(), name, cWidget.widget.get(), ctx.ctx.get());
 }
