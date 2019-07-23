@@ -13,6 +13,7 @@ class GphotoCamera {
     void init();
     GphotoCameraFile capture_preview();
     void set_single_config(const char *name, GphotoCameraWidget &cWidget);
+    GphotoCameraWidget get_single_config(const char *name);
   private:
     GphotoContext ctx;
     GphotoRefCount<Camera, gp_camera_ref, gp_camera_unref> camera;

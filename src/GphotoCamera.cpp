@@ -28,3 +28,10 @@ GphotoCameraFile GphotoCamera::capture_preview() {
 void GphotoCamera::set_single_config(const char *name, GphotoCameraWidget &cWidget) {
     gpCall(gp_camera_set_single_config, camera.get(), name, cWidget.widget.get(), ctx.ctx.get());
 }
+
+
+GphotoCameraWidget GphotoCamera::get_single_config(const char *name) {
+    CameraWidget *widget;
+    gpCall(gp_camera_get_single_config, camera.get(), name, &widget, ctx.ctx.get());
+    return GphotoCameraWidget(widget);
+}
