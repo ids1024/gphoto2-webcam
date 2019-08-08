@@ -68,7 +68,7 @@ class GphotoCameraWidget {
     class children : public GphotoBaseIterable<CameraWidget, child_iterator> {
         using GphotoBaseIterable::GphotoBaseIterable;
         inline int count() {
-            return gp_widget_count_choices(obj);
+            return gp_widget_count_children(obj);
         }
         friend class GphotoCameraWidget;
     };
