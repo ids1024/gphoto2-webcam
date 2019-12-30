@@ -11,6 +11,7 @@ const unsigned HEIGHT = 640;
 
 void setup_v4l(QApplication& app, const char *path, GphotoCamera *camera) {
     // XXX should be able to pass GphotoCamera as value; results in double free
+    // Related: https://github.com/gphoto/libgphoto2/issues/430
     V4l2Loopback loopback(path);
     loopback.set_vidformat(HEIGHT, WIDTH);
     auto timer = new QTimer();
